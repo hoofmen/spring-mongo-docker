@@ -1,0 +1,17 @@
+version: '2'
+services:
+  spring-service:
+    build: ./
+    container_name: spring-service
+    ports:
+    - 8080:8080
+    depends_on:
+    - mongo-database
+
+  mongo-database:
+    image: mongo:4.0.2
+    container_name: mongo-database
+    ports:
+    - 27017:27017
+    volumes:
+    - ./data/db:/data/db
