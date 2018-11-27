@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-service-service
+  labels:
+    app: spring-mongo-docker-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: spring-mongo-docker-service
+  ports:
+  - port: 8080
+    name: web-port
+  #clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-service-workload
+  labels:
+    app: spring-mongo-docker-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-mongo-docker-service
+  template:
+    metadata:
+      labels:
+        app: spring-mongo-docker-service
+    spec:
+      containers:
+      - name: spring-service-container
+        # where nimble-thinker-223320 should be your own project ID
+        image: spring-mongo-docker_spring-service:0.1
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+        - name: MONGO_HOST
+          value: "mongo-database-service"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-database-service
+  labels:
+    app: spring-mongo-docker-database
+spec:
+  type: LoadBalancer
+  selector:
+    app: spring-mongo-docker-database
+  ports:
+  - port: 27017
+    name: default-mongo-port
+  #clusterIP: None
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: mongo-database-workload
+spec:
+  serviceName: mongo-database-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-mongo-docker-database
+  template:
+    metadata:
+      labels:
+        app: spring-mongo-docker-database
+    spec:
+      containers:
+      - name: mongo-database-container
+        image: mongo
+        ports:
+        - containerPort: 27017
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data/db
+          name: mongo-disk-mount
+      volumes:
+      - name: mongo-disk-volume
+        # the disk should already exist
+        gcePersistentDisk:
+          pdName: mongo-disk
+          fsType: ext4

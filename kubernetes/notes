@@ -1,0 +1,19 @@
+Cluster
+=======
+determine the zone where the nodes are
+
+Node Pool
+=========
+deternmine the hardware specs of the nodes
+
+Node
+====
+will contain the kubernetes server where are the pods, interpod comunication are done via service name
+
+Pod
+===
+is the group of containers that represent a single entity, everthing inside the pod has access throgh localhost
+
+Load balancer
+=============
+externalize with a given IP a service, round robin the pods
